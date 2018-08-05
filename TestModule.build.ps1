@@ -72,7 +72,7 @@ task ShowInfo Init, {
 #endregion DebugInformation
 
 task Clean {
-    Get-item $env:BHBuildOutput | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+    Get-item $env:BHBuildOutput -ErrorAction Ignore | Remove-Item -Recurse -Force -ErrorAction Ignore
 
     foreach ($artifactName in $artifacts.keys) {
         Write-Host $artifacts[$artifactName]
