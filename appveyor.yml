@@ -26,5 +26,12 @@ install:
 build_script:
     - ps: '& $env:posh -Command "Invoke-Build"'
 
+artifacts:
+- path: TestModule.psd1
+  name: TestModule.psd1
+
+- path: TestModule.psm1
+  name: TestModule.psm1
+
 # on_failure:
     # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
