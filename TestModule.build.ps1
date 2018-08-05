@@ -45,6 +45,32 @@ task GetNextVersion {
 }
 #endregion Setup
 
+#region DebugInformation
+task ShowInfo Init, {
+    Write-Build Gray
+    Write-Build Gray ('Running in:                 {0}' -f $env:BHBuildSystem)
+    Write-Build Gray '-------------------------------------------------------'
+    Write-Build Gray
+    Write-Build Gray ('Project name:               {0}' -f $env:BHProjectName)
+    Write-Build Gray ('Project root:               {0}' -f $env:BHProjectPath)
+    Write-Build Gray ('Build Path:                 {0}' -f $env:BHBuildOutput)
+    Write-Build Gray ('Current Version:            {0}' -f $env:CurrentBuildVersion)
+    Write-Build Gray '-------------------------------------------------------'
+    Write-Build Gray
+    Write-Build Gray ('Branch:                     {0}' -f $env:BHBranchName)
+    Write-Build Gray ('Commit:                     {0}' -f $env:BHCommitMessage)
+    Write-Build Gray ('Build #:                    {0}' -f $env:BHBuildNumber)
+    Write-Build Gray ('Next Version:               {0}' -f $env:NextBuildVersion)
+    Write-Build Gray ('Will deploy new version?    {0}' -f (Test-ShouldDeploy))
+    Write-Build Gray '-------------------------------------------------------'
+    Write-Build Gray
+    Write-Build Gray ('PowerShell version:         {0}' -f $PSVersionTable.PSVersion.ToString())
+    Write-Build Gray ('OS:                         {0}' -f $OS)
+    Write-Build Gray ('OS Version:                 {0}' -f $OSVersion)
+    Write-Build Gray
+}
+#endregion DebugInformation
+
 task Clean {
     Get-item $env:BHBuildOutput | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
@@ -118,4 +144,4 @@ task Deploy Package, {
     }
 }
 
-task . Clean, Build, Package, Test, Deploy
+task . ShowInfo, Clean, Build, Package, Test, Deploy
