@@ -1,8 +1,6 @@
 version: 0.1.{build}
 
 environment:
-    APPVEYOR_API_TOKEN:
-        secure: +xOSP/ONVCmOzJ+I3PY7r7yHXf4+XtYWiYYdX0kSne0=
     matrix:
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
           PowershellVersion: "5.1"
