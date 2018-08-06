@@ -74,11 +74,7 @@ task ShowInfo Init, {
 task Clean {
     Get-item $env:BHBuildOutput -ErrorAction Ignore | Remove-Item -Recurse -Force -ErrorAction Ignore
 
-    if (-not (Test-Path $env:BHBuildOutput)) {
-        $null = New-Item -Path $env:BHBuildOutput -ItemType Directory -Force
-    }
-    Get-AppVeyorArtifact -Path $env:BHBuildOutput
-    dir $env:BHBuildOutput | Out-String | Write-Host
+    Write-Host (Get-AppVeyorArtifact)
 }
 task Build {
     # Setup
@@ -120,38 +116,22 @@ task Build {
 
     "Private", "Public" | Foreach-Object { Remove-Item -Path "$env:BHBuildOutput/$env:BHProjectName/$_" -Recurse -Force }
 
-    if (-not (Test-Path $env:BHBuildOutput)) {
-        $null = New-Item -Path $env:BHBuildOutput -ItemType Directory -Force
-    }
-    Get-AppVeyorArtifact -Path $env:BHBuildOutput
-    dir $env:BHBuildOutput | Out-String | Write-Host
+    Write-Host (Get-AppVeyorArtifact)
 }
 task Package Build, {
     Get-ChildItem $env:BHBuildOutput/$env:BHProjectName | % { Push-AppveyorArtifact $_.FullName }
 
-    if (-not (Test-Path $env:BHBuildOutput)) {
-        $null = New-Item -Path $env:BHBuildOutput -ItemType Directory -Force
-    }
-    Get-AppVeyorArtifact -Path $env:BHBuildOutput
-    dir $env:BHBuildOutput | Out-String | Write-Host
+    Write-Host (Get-AppVeyorArtifact)
 }
 task Test {
     Invoke-Pester
 
-    if (-not (Test-Path $env:BHBuildOutput)) {
-        $null = New-Item -Path $env:BHBuildOutput -ItemType Directory -Force
-    }
-    Get-AppVeyorArtifact -Path $env:BHBuildOutput
-    dir $env:BHBuildOutput | Out-String | Write-Host
+    Write-Host (Get-AppVeyorArtifact)
 }
 task Deploy Package, {
     Write-Host deploying
 
-    if (-not (Test-Path $env:BHBuildOutput)) {
-        $null = New-Item -Path $env:BHBuildOutput -ItemType Directory -Force
-    }
-    Get-AppVeyorArtifact -Path $env:BHBuildOutput
-    dir $env:BHBuildOutput | Out-String | Write-Host
+    Write-Host (Get-AppVeyorArtifact)
 }
 
 task . ShowInfo, Clean, Build, Package, Test, Deploy

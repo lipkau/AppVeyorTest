@@ -90,19 +90,20 @@ function Get-AppVeyorArtifact {
         $Filename | Foreach-Object {
             $__ -like $_
         }
-    } | Foreach-Object {
-        Write-Host ($_ | Out-String)
-        $filename = $_.filename
-        $invokeRestMethodSplat = @{
-            Uri = "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/$filename"
-            Method = 'GET'
-            Headers = @{
-                "Authorization" = "Bearer $env:APPVEYOR_API_TOKEN"
-            }
-            OutFile = "$Path/$filename"
-        }
-        Invoke-RestMethod @invokeRestMethodSplat
     }
+    # | Foreach-Object {
+    #     Write-Host ($_ | Out-String)
+    #     $filename = $_.filename
+    #     $invokeRestMethodSplat = @{
+    #         Uri = "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/$filename"
+    #         Method = 'GET'
+    #         Headers = @{
+    #             "Authorization" = "Bearer $env:APPVEYOR_API_TOKEN"
+    #         }
+    #         OutFile = "$Path/$filename"
+    #     }
+    #     Invoke-RestMethod @invokeRestMethodSplat
+    # }
 }
 
 function Get-TravisBuild {
