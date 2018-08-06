@@ -91,6 +91,7 @@ function Get-AppVeyorArtifact {
             $__ -like $_
         }
     } | Foreach-Object {
+        Write-Host ($_ | Out-String)
         $filename = $_.filename
         $invokeRestMethodSplat = @{
             Uri = "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/$filename"
