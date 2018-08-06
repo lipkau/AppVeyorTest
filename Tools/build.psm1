@@ -85,12 +85,12 @@ function Get-AppVeyorArtifact {
             "Content-type"  = "application/json"
         }
     }
-    Invoke-RestMethod @invokeRestMethodSplat | Where-Object {
+    Invoke-RestMethod @invokeRestMethodSplat <# | Where-Object {
         $__ = $_.filename
         $Filename | Foreach-Object {
             $__ -like $_
         }
-    }
+    } #>
     # | Foreach-Object {
     #     Write-Host ($_ | Out-String)
     #     $filename = $_.filename
