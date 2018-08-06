@@ -28,6 +28,7 @@ function Add-ToModulePath ([String]$Path) {
         $env:PSModulePath = $PSModulePath -join ([IO.Path]::PathSeparator)
     }
 }
+
 function Install-PSDepend {
     if (-not (Get-Module PSDepend -ListAvailable)) {
         if (Get-Module PowershellGet -ListAvailable) {
@@ -39,7 +40,7 @@ function Install-PSDepend {
     }
 }
 
-function Get-AppVeyorBuild {
+function Get-AppVeyorProject {
     param()
 
     Assert-True { $env:APPVEYOR_API_TOKEN } "missing api token for AppVeyor."
@@ -54,6 +55,53 @@ function Get-AppVeyorBuild {
         }
     }
     Invoke-RestMethod @invokeRestMethodSplat
+}
+
+function Get-AppVeyorArtifact {
+    param(
+        [Parameter( ValueFromPipeline )]
+        [ValidateNotNullOrEmpty()]
+        [SupportsWildcards()]
+        [String[]]
+        $Filename = "*",
+
+        [Parameter()]
+        [ValidateScript({ if (Test-Path $_ -PathType Container) { $true } else { throw "Path must be a directory" }})]
+        [String]
+        $Path = (Get-Location -PSProvider FileSystem).Path
+    )
+
+    Assert-True { $env:APPVEYOR_API_TOKEN } "missing api token for AppVeyor."
+    Assert-True { $env:APPVEYOR_ACCOUNT_NAME } "not an appveyor build."
+
+    $project = Get-AppVeyorProject
+    $jobId = $project.build.jobs[0].jobId
+
+    $invokeRestMethodSplat = @{
+        Uri = "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts"
+        Method = 'GET'
+        Headers = @{
+            "Authorization" = "Bearer $env:APPVEYOR_API_TOKEN"
+            "Content-type"  = "application/json"
+        }
+    }
+    Invoke-RestMethod @invokeRestMethodSplat | Where-Object {
+        $__ = $_.filename
+        $Filename | Foreach-Object {
+            $__ -like $_
+        }
+    } | Foreach-Object {
+        $filename = $_.filename
+        $invokeRestMethodSplat = @{
+            Uri = "https://ci.appveyor.com/api/buildjobs/$jobId/artifacts/$filename"
+            Method = 'GET'
+            Headers = @{
+                "Authorization" = "Bearer $env:APPVEYOR_API_TOKEN"
+            }
+            OutFile = "$Path/$filename"
+        }
+        Invoke-RestMethod @invokeRestMethodSplat
+    }
 }
 
 function Get-TravisBuild {
@@ -81,8 +129,8 @@ function Test-IsLastJob {
     }
     Assert-True { $env:APPVEYOR_JOB_ID } "Invalid Job identifier"
 
-    $buildData = Get-AppVeyorBuild
-    $lastJob = ($buildData.build.jobs | Select-Object -Last 1).jobId
+    $project = Get-AppVeyorProject
+    $lastJob = $project.build.jobs[-1].jobId
 
     if ($lastJob -eq $env:APPVEYOR_JOB_ID) {
         return $true
@@ -225,7 +273,7 @@ function Set-AppVeyorBuildNumber {
 #     [datetime]$stop = ([datetime]::Now).AddMinutes($env:TimeOutMins)
 
 #     do {
-#         $project = Get-AppVeyorBuild
+#         $project = Get-AppVeyorProject
 #         $continue = @()
 #         $project.build.jobs | Where-Object {$_.jobId -ne $env:APPVEYOR_JOB_ID} | Foreach-Object {
 #             $job = $_

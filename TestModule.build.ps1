@@ -74,9 +74,8 @@ task ShowInfo Init, {
 task Clean {
     Get-item $env:BHBuildOutput -ErrorAction Ignore | Remove-Item -Recurse -Force -ErrorAction Ignore
 
-    foreach ($artifactName in $artifacts.keys) {
-        Write-Host $artifacts[$artifactName]
-    }
+    Get-AppVeyorArtifact -Path $env:BHBuildOutput
+    dir $env:BHBuildOutput | Out-String | Write-Host
 }
 task Build {
     # Setup
@@ -118,30 +117,26 @@ task Build {
 
     "Private", "Public" | Foreach-Object { Remove-Item -Path "$env:BHBuildOutput/$env:BHProjectName/$_" -Recurse -Force }
 
-    foreach ($artifactName in $artifacts.keys) {
-        Write-Host $artifacts[$artifactName]
-    }
+    Get-AppVeyorArtifact -Path $env:BHBuildOutput
+    dir $env:BHBuildOutput | Out-String | Write-Host
 }
 task Package Build, {
     Get-ChildItem $env:BHBuildOutput/$env:BHProjectName | % { Push-AppveyorArtifact $_.FullName }
 
-    foreach ($artifactName in $artifacts.keys) {
-        Write-Host $artifacts[$artifactName]
-    }
+    Get-AppVeyorArtifact -Path $env:BHBuildOutput
+    dir $env:BHBuildOutput | Out-String | Write-Host
 }
 task Test {
     Invoke-Pester
 
-    foreach ($artifactName in $artifacts.keys) {
-        Write-Host $artifacts[$artifactName]
-    }
+    Get-AppVeyorArtifact -Path $env:BHBuildOutput
+    dir $env:BHBuildOutput | Out-String | Write-Host
 }
 task Deploy Package, {
     Write-Host deploying
 
-    foreach ($artifactName in $artifacts.keys) {
-        Write-Host $artifacts[$artifactName]
-    }
+    Get-AppVeyorArtifact -Path $env:BHBuildOutput
+    dir $env:BHBuildOutput | Out-String | Write-Host
 }
 
 task . ShowInfo, Clean, Build, Package, Test, Deploy
