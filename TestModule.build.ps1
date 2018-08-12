@@ -137,7 +137,7 @@ task Test {
 
     Write-Host (Get-AppVeyorArtifact -Job $project.build.jobs[0])
 }
-task Deploy Package, {
+task Deploy {
     Write-Host deploying
 
     Write-Host (Get-AppVeyorArtifact -Job $project.build.jobs[0])
