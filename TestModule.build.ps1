@@ -76,8 +76,7 @@ task ShowInfo Init, {
 task Clean {
     Get-item $env:BHBuildOutput -ErrorAction Ignore | Remove-Item -Recurse -Force -ErrorAction Ignore
 
-    Write-Host "ooo"
-    Write-Host (Get-AppVeyorArtifact)
+    Write-Host (Get-AppVeyorArtifact -Job $project.build.jobs[0])
 }
 task Build {
     # Setup
@@ -119,7 +118,7 @@ task Build {
 
     "Private", "Public" | Foreach-Object { Remove-Item -Path "$env:BHBuildOutput/$env:BHProjectName/$_" -Recurse -Force }
 
-    Write-Host (Get-AppVeyorArtifact)
+    Write-Host (Get-AppVeyorArtifact -Job $project.build.jobs[0])
 }
 task Package Build, {
     Get-ChildItem $env:BHBuildOutput/$env:BHProjectName | % { Push-AppveyorArtifact $_.FullName }
@@ -136,12 +135,12 @@ task Download {
 task Test {
     Invoke-Pester
 
-    Write-Host (Get-AppVeyorArtifact)
+    Write-Host (Get-AppVeyorArtifact -Job $project.build.jobs[0])
 }
 task Deploy Package, {
     Write-Host deploying
 
-    Write-Host (Get-AppVeyorArtifact)
+    Write-Host (Get-AppVeyorArtifact -Job $project.build.jobs[0])
 }
 
 if ((-not $env:APPVEYOR_JOB_ID) -or ($env:APPVEYOR_JOB_ID -eq $project.build.jobs[0].JobId)) {
