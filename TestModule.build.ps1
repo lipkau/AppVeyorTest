@@ -1,6 +1,8 @@
 param()
 
 Import-Module "$PSScriptRoot/Tools/build.psm1" -Force -ErrorAction Stop
+Import-Module "$PSScriptRoot/Tools/AppVeyor.psm1" -Force -ErrorAction Stop
+$project = Get-AppVeyorProject
 if ($BuildTask -notin @("SetUp", "InstallDependencies")) {
     Import-Module BuildHelpers -Force -ErrorAction Stop
 }
@@ -120,8 +122,10 @@ task Build {
 }
 task Package Build, {
     Get-ChildItem $env:BHBuildOutput/$env:BHProjectName | % { Push-AppveyorArtifact $_.FullName }
-
-    Write-Host (Get-AppVeyorArtifact)
+}
+task Download {
+    Get-AppVeyorArtifact -Job $project.build.jobs[0] -Verbose |
+        Get-AppVeyorArtifactFile -Job $project.build.jobs[0] -OutPath "$env:BHBuildOutput/$env:BHProjectName" -Verbose
 }
 task Test {
     Invoke-Pester
@@ -134,4 +138,9 @@ task Deploy Package, {
     Write-Host (Get-AppVeyorArtifact)
 }
 
-task . ShowInfo, Clean, Build, Package, Test, Deploy
+if ($env:APPVEYOR_JOB_ID -and ($env:APPVEYOR_JOB_ID -eq $project.build.jobs[0].JobId)) {
+    task . ShowInfo, Clean, Build, Package, Test, Deploy
+}
+else {
+    task . ShowInfo, Clean, Download, Test, Deploy
+}
