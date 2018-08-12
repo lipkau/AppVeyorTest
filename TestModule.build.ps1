@@ -76,6 +76,7 @@ task ShowInfo Init, {
 task Clean {
     Get-item $env:BHBuildOutput -ErrorAction Ignore | Remove-Item -Recurse -Force -ErrorAction Ignore
 
+    Write-Host "ooo"
     Write-Host (Get-AppVeyorArtifact)
 }
 task Build {
@@ -124,6 +125,11 @@ task Package Build, {
     Get-ChildItem $env:BHBuildOutput/$env:BHProjectName | % { Push-AppveyorArtifact $_.FullName }
 }
 task Download {
+    # Setup
+    if (-not (Test-Path "$env:BHBuildOutput/$env:BHProjectName")) {
+        $null = New-Item -Path "$env:BHBuildOutput/$env:BHProjectName" -ItemType Directory
+    }
+
     Get-AppVeyorArtifact -Job $project.build.jobs[0] -Verbose |
         Get-AppVeyorArtifactFile -Job $project.build.jobs[0] -OutPath "$env:BHBuildOutput/$env:BHProjectName" -Verbose
 }
@@ -138,9 +144,11 @@ task Deploy Package, {
     Write-Host (Get-AppVeyorArtifact)
 }
 
-if ($env:APPVEYOR_JOB_ID -and ($env:APPVEYOR_JOB_ID -eq $project.build.jobs[0].JobId)) {
+if ((-not $env:APPVEYOR_JOB_ID) -or ($env:APPVEYOR_JOB_ID -eq $project.build.jobs[0].JobId)) {
+    Write-Host "You are in the first job"
     task . ShowInfo, Clean, Build, Package, Test, Deploy
 }
 else {
+    Write-Host "You are NOT in the first job"
     task . ShowInfo, Clean, Download, Test, Deploy
 }
